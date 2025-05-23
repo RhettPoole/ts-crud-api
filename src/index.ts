@@ -34,6 +34,13 @@ class Product {
   }
 }
 
+// Tuple-based validation function
+function validateProductInput(name: any, price: any): [boolean, string] {
+  if (!name || typeof name !== "string") return [false, "Name must be a non-empty string"];
+  if (price == null || typeof price !== "number" || price < 0) return [false, "Price must be a non-negative number"];
+  return [true, ""];
+}
+
 // 5, Declares an array of products to hold all data, baseically a temporary and local database.
 let products: Product[] = [];
 let idCounter = 1;
@@ -43,17 +50,10 @@ let idCounter = 1;
 app.post("/products", (req: Request, res: Response) => {
   const { name, price } = req.body;
 
-  // Validation
-  // || is a logical or. If (thing or thing or...)
-  if (
-    !name ||
-    typeof name !== "string" ||
-    price == null ||
-    typeof price !== "number" ||
-    price < 0
-  ) {
-    // if there's any issues then return string below. "400" is the default bad request error msg
-    return res.status(400).json({ message: "Invalid product data" });
+  // Use tuple-based validation
+  const [isValid, message] = validateProductInput(name, price);
+  if (!isValid) {
+    return res.status(400).json({ message });
   }
 
   // Create product with auto incrementing id, consume and add the name and price and new id to the array.
